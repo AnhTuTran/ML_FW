@@ -27,7 +27,7 @@ public:
 	~NeuralNetwork();
 	double getCostFunc();
 	ParamBlock* get_weights();
-	ParamBlock* getNumericalGradient();
+	//ParamBlock* getNumericalGradient();
 	//ParamBlock* computeGradient();
 	void training(int epochs);
 	Log* get_log();
