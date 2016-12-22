@@ -19,6 +19,8 @@ Log::Log(int epochs) {
 double Log::get_cost_num(int epoch_num) {
 	if (epoch_num >= this->epochs)
 		return -1;
+	if (this->epochs == 1)
+		return *this->cost_func_num;
 	return this->cost_func_num[epoch_num];
 }
 

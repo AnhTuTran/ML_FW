@@ -17,6 +17,7 @@
 #include "../header/ML_FW.h"
 #include <math.h>
 #include <stdlib.h>
+#include <omp.h>
 
 using namespace std;
 
@@ -27,6 +28,7 @@ void testLog();
 void testNetworkManipulation();
 void testNeuralNetwork();
 void testGradient_NetworkMani();
+void test_mul_mat_parallel();
 
 int main() {
 	//testTrainingExample();
@@ -36,7 +38,7 @@ int main() {
 	//testNetworkManipulation();
 	testNeuralNetwork();
 	//testGradient_NetworkMani();
-	//testForward();
+	//test_mul_mat_parallel();
 
 }
 
@@ -56,6 +58,7 @@ void testTrainingExample() {
 	cout << "Output " << tr_exp.get_output() << endl;
 	cout << "Input " << in << " " << tr_exp.get_input() << endl;
 #endif
+	delete[] in;
 }
 
 void testDataManagement() {
@@ -72,7 +75,6 @@ void testDataManagement() {
 			cout << data[i].get_input()[j] << " ";
 		}
 		cout << data[i].get_output() << endl;
-		;
 	}
 }
 
@@ -192,9 +194,15 @@ void testNetworkManipulation() {
 }
 
 void testNeuralNetwork() {
+	int num_threads = 1;
+	omp_set_num_threads(num_threads);
 	int batch_size = 5000;
 	string data_file_name = "../data/data_set1.csv";
 	DataManagement dataManagement(batch_size, data_file_name);
+	double time = omp_get_wtime();
+
+	// int input_size = 400; output_size = 10;
+	// hidden_size = 25; num_layers = 3;
 
 	int input_size = 400;
 	int output_size = 10;
@@ -207,7 +215,7 @@ void testNeuralNetwork() {
 	cout << "Cost function: ";
 	cout << neuralNet.getCostFunc() << endl;
 
-	int epochs = 100;
+	int epochs = 5;
 	cout << "Training\n";
 	neuralNet.training(epochs);
 
@@ -215,10 +223,9 @@ void testNeuralNetwork() {
 	cout << "Accuracy: "
 			<< net_evaluation.mean_net_accuracy(&dataManagement,
 					neuralNet.get_weights(), &netMan) << "%" << endl;
-
+	time = omp_get_wtime() - time;
+	printf("Execution time: %f \n", time);
 }
-
-
 
 void testGradient_NetworkMani() {
 
@@ -284,4 +291,30 @@ void testGradient_NetworkMani() {
 		}
 		cout << endl;
 	}
+}
+
+void test_mul_mat_parallel() {
+	int th = 1;
+	omp_set_num_threads(th);
+
+	NetworkManipulation net_nam(2, 2, 2, 2);
+
+	int n = 500;
+	ParamBlock a(n, n), b(n, n), c(n, n);
+	double time = omp_get_wtime();
+#pragma omp parallel for
+	for (int i = 0; i < n; i++)
+		for (int j = 0; j < n; j++) {
+			a.setParam(i, j, 1);
+			b.setParam(i, j, 2);
+		}
+
+
+	//net_nam.mul_matrices(&a, &b, &c);
+	time = omp_get_wtime() - time;
+
+	cout << c.getParam(0, 0) << " " << c.getParam(n / 2, n / 2) << " "
+			<< c.getParam(n-1, n-1) << endl;
+
+	printf("Execution time: %f \n", time);
 }

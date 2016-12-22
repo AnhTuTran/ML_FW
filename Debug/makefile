@@ -44,7 +44,7 @@ all: ML_FW
 ML_FW: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MacOS X C++ Linker'
-	g++-mp-6  -o "ML_FW" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++-mp-6 -fopenmp  -o "ML_FW" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

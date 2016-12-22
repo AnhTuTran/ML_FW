@@ -10,6 +10,7 @@
 #include <iostream>
 #include <math.h>
 #include <stdlib.h>
+#include <omp.h>
 
 using namespace std;
 
@@ -78,6 +79,7 @@ double NeuralNetwork::getCostFunc() {
 	TrainingExample* training_set;
 	ParamBlock* activation;
 	double tr_exp_output;
+	double temp = 0;
 
 	if (!this->data_management->is_data_ready())
 		this->data_management->get_data_from_file();
@@ -90,7 +92,6 @@ double NeuralNetwork::getCostFunc() {
 	for (int i = 0; i < batch_size; i++) {
 		activation = this->net_manipulation->forwardProp(this->weights,
 				training_set[i].get_input());
-
 		for (int j = 0; j < output_size; j++) {
 			tr_exp_output =
 					((int(training_set[i].get_output()) % int(output_size)) == j) ?
@@ -100,16 +101,15 @@ double NeuralNetwork::getCostFunc() {
 							* std::log(1 - activation->getParam(j, 0));
 		}
 	}
-	costFunc *= -(1.0 / batch_size);
-
-	double temp = 0;
+//#pragma parallel omp for reduction (+:temp)
 	for (int i = 0; i < num_layers - 1; i++) {
 		for (int j = 0; j < this->weights[i].get_dim_x(); j++)
 			for (int k = 1; k < this->weights[i].get_dim_y(); k++)
 				temp += pow(this->weights[i].getParam(j, k), 2.0);
 	}
-	temp *= (this->lambda / (2.0 * batch_size));
 
+	temp *= (this->lambda / (2.0 * batch_size));
+	costFunc *= -(1.0 / batch_size);
 	costFunc += temp;
 	return costFunc;
 }

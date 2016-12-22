@@ -34,7 +34,7 @@ public:
 	int get_hidden_size();
 	int get_num_layers();
 
-private:
+//private:
 	double sigmoid(double x);
 	double sigmoidGradient(double x);
 	void mul_matrices(ParamBlock* weights, ParamBlock* activation,
