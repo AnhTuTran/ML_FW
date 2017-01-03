@@ -194,7 +194,7 @@ void testNetworkManipulation() {
 }
 
 void testNeuralNetwork() {
-	int num_threads = 1;
+	int num_threads = 4;
 	omp_set_num_threads(num_threads);
 	int batch_size = 5000;
 	string data_file_name = "../data/data_set1.csv";
@@ -206,7 +206,7 @@ void testNeuralNetwork() {
 
 	int input_size = 400;
 	int output_size = 10;
-	int hidden_size = 25;
+	int hidden_size = 200;
 	int num_layers = 3;
 	NetworkManipulation netMan(input_size, output_size, hidden_size,
 			num_layers);
@@ -215,7 +215,7 @@ void testNeuralNetwork() {
 	cout << "Cost function: ";
 	cout << neuralNet.getCostFunc() << endl;
 
-	int epochs = 5;
+	int epochs = 50;
 	cout << "Training\n";
 	neuralNet.training(epochs);
 

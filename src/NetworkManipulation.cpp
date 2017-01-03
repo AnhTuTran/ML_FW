@@ -196,7 +196,7 @@ void NetworkManipulation::mul_matrices(ParamBlock* weights,
 			b[i * activation_dim_y + j] = activation->getParam(i, j);
 	}
 
-#pragma omp parallel for shared (a, b, c)
+#pragma omp parallel for
 	for (int i = 0; i < weights_dim_x; i++)
 		for (int k = 0; k < activation_dim_y; k++)
 			for (int j = 0; j < weights_dim_y; j++)
@@ -230,8 +230,10 @@ ParamBlock* NetworkManipulation::backProp(ParamBlock* weights,
 
 		ParamBlock temp(weights[i + weights_off_lay].get_dim_y(),
 				this->deltas[i + 1 + delta_off_lay].get_dim_y());
-		mul_matrices(tranpose_mat(&weights[i + weights_off_lay]),
+		ParamBlock* tran_mat = tranpose_mat(&weights[i + weights_off_lay]);
+		mul_matrices(tran_mat,
 				&this->deltas[i + 1 + delta_off_lay], &temp);
+
 ////#pragma omp parallel
 		for (int j = 0; j < this->z[i + z_off_lay].get_dim_x(); j++) {
 			this->deltas[i + delta_off_lay].setParam(j, 0,
@@ -240,6 +242,7 @@ ParamBlock* NetworkManipulation::backProp(ParamBlock* weights,
 									this->z[i + z_off_lay].getParam(j, 0)));
 		}
 
+		delete tran_mat;
 	}
 	return this->deltas;
 }
@@ -299,9 +302,12 @@ ParamBlock* NetworkManipulation::computeGradient(ParamBlock* weights,
 //		std::cout << '\n';
 		//
 
-		for (int i = 0; i < this->num_layers - 1; i++)
-			mul_matrices(&deltas[i], tranpose_mat(&this->activations[i]),
+		for (int i = 0; i < this->num_layers - 1; i++) {
+			ParamBlock* tran_mat = tranpose_mat(&this->activations[i]);
+			mul_matrices(&deltas[i], tran_mat,
 					&temp[i]);
+			delete tran_mat;
+		}
 
 		for (int j = 0; j < this->num_layers - 1; j++)
 			for (int k = 0; k < this->gradients[j].get_dim_x(); k++)
@@ -331,6 +337,7 @@ ParamBlock* NetworkManipulation::computeGradient(ParamBlock* weights,
 				}
 			}
 
+	delete[] temp;
 	return this->gradients;
 }
 

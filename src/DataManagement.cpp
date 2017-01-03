@@ -68,6 +68,8 @@ void DataManagement::get_data_from_file() {
 			this->tr_exp_num++;
 			i++;
 
+			delete[] arr;
+
 		}
 		data_file.close();
 		this->data_ready = true;
